@@ -1,12 +1,10 @@
 import * as THREE from "three";
 
+import { lonLatDegFromThreeDefaultUnitDirection } from "../earth/sphereGeometryLatLon";
+import type { HumanCountryIndex } from "./humanCountryPlacement";
+import { pickHumanDirectionsByCountry } from "./humanCountryPlacement";
 import type { SpeciesId } from "./speciesIds";
 import { isEndangeredSpeciesId } from "./speciesIds";
-
-function lonLatFromDirection(dir: THREE.Vector3, out: { lon: number; lat: number }): void {
-  out.lat = Math.asin(Math.max(-1, Math.min(1, dir.y)));
-  out.lon = Math.atan2(dir.z, dir.x);
-}
 
 /** Broad livestock belts (score only; still restricted to land pool samples). */
 function cattleChickenWeight(lonDeg: number, latDeg: number): number {
@@ -40,20 +38,23 @@ export function pickLandDirectionsForSpecies(
   landPool: THREE.Vector3[],
   speciesId: SpeciesId,
   count: number,
+  humanCountryIndex?: HumanCountryIndex | null,
 ): THREE.Vector3[] {
   if (landPool.length === 0 || count <= 0) return [];
 
-  const ll = { lon: 0, lat: 0 };
+  if (speciesId === "humans" && humanCountryIndex?.countries.length) {
+    return pickHumanDirectionsByCountry(landPool, humanCountryIndex, count);
+  }
+
+  const llDeg = { lonDeg: 0, latDeg: 0 };
   const out: THREE.Vector3[] = [];
 
   let wMax = 0;
   const probe = Math.min(landPool.length, 4000);
   for (let i = 0; i < probe; i++) {
     const d = landPool[(Math.random() * landPool.length) | 0]!;
-    lonLatFromDirection(d, ll);
-    const lonDeg = (ll.lon * 180) / Math.PI;
-    const latDeg = (ll.lat * 180) / Math.PI;
-    wMax = Math.max(wMax, weightForSpecies(speciesId, lonDeg, latDeg));
+    lonLatDegFromThreeDefaultUnitDirection(d, llDeg);
+    wMax = Math.max(wMax, weightForSpecies(speciesId, llDeg.lonDeg, llDeg.latDeg));
   }
   wMax = Math.max(wMax, 1e-6);
 
@@ -62,9 +63,9 @@ export function pickLandDirectionsForSpecies(
   while (out.length < count && guard < guardMax) {
     guard++;
     const d = landPool[(Math.random() * landPool.length) | 0]!;
-    lonLatFromDirection(d, ll);
-    const lonDeg = (ll.lon * 180) / Math.PI;
-    const latDeg = (ll.lat * 180) / Math.PI;
+    lonLatDegFromThreeDefaultUnitDirection(d, llDeg);
+    const lonDeg = llDeg.lonDeg;
+    const latDeg = llDeg.latDeg;
     const w = weightForSpecies(speciesId, lonDeg, latDeg);
     if (Math.random() <= w / wMax) out.push(d.clone());
   }

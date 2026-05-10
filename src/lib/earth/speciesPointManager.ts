@@ -1,5 +1,6 @@
 import * as THREE from "three";
 
+import type { HumanCountryIndex } from "../visualization/humanCountryPlacement";
 import { pickLandDirectionsForSpecies } from "../visualization/placement";
 import type { SpeciesId } from "../visualization/speciesIds";
 
@@ -22,6 +23,7 @@ export function createSpeciesPointManager(scene: THREE.Scene) {
   // Unit sphere + uniform scale: visible markers on a unit Earth (tune `s` if too big/small at your zoom).
   const sharedGeometry = new THREE.SphereGeometry(1, 10, 10);
   let landPool: THREE.Vector3[] | null = null;
+  let humanCountryIndex: HumanCountryIndex | null = null;
   let lastLayers: SpeciesPointLayerInput[] = [];
 
   const m = new THREE.Matrix4();
@@ -45,7 +47,7 @@ export function createSpeciesPointManager(scene: THREE.Scene) {
 
     for (const layer of lastLayers) {
       if (layer.count <= 0) continue;
-      const dirs = pickLandDirectionsForSpecies(landPool, layer.id, layer.count);
+      const dirs = pickLandDirectionsForSpecies(landPool, layer.id, layer.count, humanCountryIndex);
       const material = new THREE.MeshBasicMaterial({
         color: layer.color,
         transparent: true,
@@ -67,6 +69,11 @@ export function createSpeciesPointManager(scene: THREE.Scene) {
   return {
     setLandPool(pool: THREE.Vector3[]) {
       landPool = pool;
+      rebuild();
+    },
+
+    setHumanCountryIndex(index: HumanCountryIndex | null) {
+      humanCountryIndex = index;
       rebuild();
     },
 

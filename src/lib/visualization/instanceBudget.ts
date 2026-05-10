@@ -6,11 +6,11 @@ import type { SpeciesId } from "./speciesIds";
  * (same solo budget: humans ≫ cattle when populations differ).
  */
 
-const BUDGET_ONE = 10_000;
-const BUDGET_TWO = 12_000;
+const BUDGET_ONE = 14_000;
+const BUDGET_TWO = 15_000;
 const PER_LAYER_MIN = 200;
 const PER_LAYER_MAX_SOLO = BUDGET_ONE;
-const PER_LAYER_MAX_PAIR = 9000;
+const PER_LAYER_MAX_PAIR = 10_000;
 
 /** Order-of-magnitude anchors; also defines the global ceiling for cross-species comparison. */
 export const REF_POP: Record<SpeciesId, number> = {

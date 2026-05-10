@@ -23,7 +23,8 @@ export const SPECIES_SHORT_NAME: Record<SpeciesId, string> = {
 
 /** Texte d’aide au survol de la ligne (visualisation / données). */
 export const SPECIES_CHECKBOX_LABEL: Record<SpeciesId, string> = {
-  humans: "Humains (points sur les terres émergées)",
+  humans:
+    "Humains (points par pays : poids ∝ population Natural Earth + bonus √superficie ; Antarctique exclu — PiP invalide au pôle ; budget solo ~14k)",
   cattle: "Bovins (densité visuelle majorée là où l’élevage est courant — approximation)",
   chickens: "Volailles (même logique d’approximation)",
   tiger: "Tigre (Panthera tigris) — population sauvage estimée",

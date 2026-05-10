@@ -71,9 +71,6 @@ export function SpeciesStatsPanel({
                       : loading
                         ? "…"
                         : "—";
-                const metaOk =
-                  r?.status === "ok" &&
-                  [r.unit, r.year != null ? String(r.year) : null].filter(Boolean).join(" · ");
                 return (
                   <li key={id} className="species-stats__primary-item">
                     <label className="species-stats__primary-row" title={title}>

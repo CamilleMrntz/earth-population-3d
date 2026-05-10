@@ -5,6 +5,12 @@ import { EARTH_DAY_MAP_PATH, EARTH_NORMAL_MAP_PATH, EARTH_SPHERE_SEGMENTS } from
 import { createSpeciesPointManager, type SpeciesPointLayerInput } from "./speciesPointManager";
 import { getSunDirectionUnit } from "./subsolar";
 import { buildLandDirectionPool } from "../visualization/landSampler";
+import {
+  createWorldAdminBordersLineSegments,
+  disposeBorderLineSegments,
+  type GeoJsonAdminCountriesFeatureCollection,
+} from "./countryBorders";
+import { buildHumanCountryIndexFromNe110m } from "../visualization/humanCountryPlacement";
 
 export type GlobeSceneHandle = {
   dispose: () => void;
@@ -91,6 +97,31 @@ export function createGlobeScene(container: HTMLElement): GlobeSceneHandle {
   const earth = new THREE.Mesh(geometry, material);
   scene.add(earth);
 
+  /** Frontières pays (Natural Earth 110m) : lignes bleues au-dessus du globe. */
+  let countryBordersMesh: THREE.LineSegments | null = null;
+  let globeDisposed = false;
+  const bordersGeoUrl = `${import.meta.env.BASE_URL}data/ne_110m_admin_0_countries.geojson`;
+  void fetch(bordersGeoUrl)
+    .then((r) => {
+      if (!r.ok) throw new Error(`Countries GeoJSON: ${r.status}`);
+      return r.json() as Promise<GeoJsonAdminCountriesFeatureCollection>;
+    })
+    .then((geojson) => {
+      if (globeDisposed) return;
+      const mesh = createWorldAdminBordersLineSegments(geojson, { color: 0x1a6cff });
+      if (globeDisposed) {
+        disposeBorderLineSegments(mesh);
+        return;
+      }
+      countryBordersMesh = mesh;
+      scene.add(mesh);
+      const humanIdx = buildHumanCountryIndexFromNe110m(geojson);
+      speciesPoints.setHumanCountryIndex(humanIdx);
+    })
+    .catch(() => {
+      /* optionnel : pas de frontières si fetch échoue */
+    });
+
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.06;
@@ -122,10 +153,16 @@ export function createGlobeScene(container: HTMLElement): GlobeSceneHandle {
   window.addEventListener("resize", onResize);
 
   const dispose = () => {
+    globeDisposed = true;
     cancelAnimationFrame(rafId);
     window.removeEventListener("resize", onResize);
 
     speciesPoints.dispose();
+    if (countryBordersMesh) {
+      scene.remove(countryBordersMesh);
+      disposeBorderLineSegments(countryBordersMesh);
+      countryBordersMesh = null;
+    }
     controls.dispose();
     geometry.dispose();
     material.dispose();

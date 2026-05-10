@@ -1,21 +1,12 @@
 import * as THREE from "three";
 
+import { unitDirectionFromLonLatDegThreeDefaultSphere } from "../earth/sphereGeometryLatLon";
+
 /**
  * Heuristic ocean detection on the Blue-Marble-style diffuse map (lots of deep blue water).
  */
 function isLikelyOcean(r: number, g: number, b: number): boolean {
   return b > 0.42 && b > r + 0.06 && b > g + 0.04;
-}
-
-/**
- * Equirectangular UV [0,1]x[0,1] → unit direction (Y-up) consistent with common Earth textures
- * (u : −180°…180°, v : 90°…−90° latitude).
- */
-export function directionFromMapUv(u: number, v: number, target: THREE.Vector3): THREE.Vector3 {
-  const lon = u * Math.PI * 2 - Math.PI;
-  const lat = Math.PI * (0.5 - v);
-  const cl = Math.cos(lat);
-  return target.set(cl * Math.cos(lon), Math.sin(lat), cl * Math.sin(lon)).normalize();
 }
 
 /**
@@ -47,7 +38,10 @@ export function buildLandDirectionPool(image: HTMLImageElement, targetCount: num
     const g = img[i + 1]! / 255;
     const b = img[i + 2]! / 255;
     if (isLikelyOcean(r, g, b)) continue;
-    pool.push(directionFromMapUv(u, v, tmp.clone()));
+    const lonDeg = u * 360 - 180;
+    const latDeg = 90 - 180 * v;
+    unitDirectionFromLonLatDegThreeDefaultSphere(lonDeg, latDeg, tmp);
+    pool.push(tmp.clone());
   }
   return pool;
 }
