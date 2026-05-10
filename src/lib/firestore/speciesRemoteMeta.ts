@@ -17,8 +17,16 @@ export const SPECIES_REMOTE_META: Record<
     faostatQclItemCode: 1058,
     notes: "FAOSTAT QCL stocks / secours local si API indispo.",
   },
-  pigeons: {
-    faostatQclItemCode: 1079,
-    notes: "Code article FAOSTAT à valider selon révision de la base.",
+  tiger: {
+    notes: "Effectif sauvage — synthèse type Liste rouge IUCN / rapports nationaux ; pas de flux FAOSTAT.",
+  },
+  mountain_gorilla: {
+    notes: "Gorilla beringei beringei — estimations census régionaux (Virunga, Bwindi…).",
+  },
+  black_rhino: {
+    notes: "Diceros bicornis — agrégats sauvage (Afrique de l’Est / Sud).",
+  },
+  vaquita: {
+    notes: "Phocoena sinus — effectif critique du golfe de Californie.",
   },
 };

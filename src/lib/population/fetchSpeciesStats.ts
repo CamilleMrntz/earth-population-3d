@@ -2,7 +2,17 @@ import { fetchFaostatQclWorldStocksHeads } from "./faostat";
 import { loadLivestockFallback } from "./loadLivestockFallback";
 import type { LivestockFallbackFile } from "./loadLivestockFallback";
 import type { SpeciesStatRow } from "./types";
+import { SPECIES_ENDANGERED_IDS } from "../visualization/speciesIds";
 import { fetchWorldBankLatest } from "./worldBank";
+
+const IUCN_HUB = "https://www.iucnredlist.org/";
+
+const ENDANGERED_ERR_LABEL: Record<(typeof SPECIES_ENDANGERED_IDS)[number], string> = {
+  tiger: "Tigre",
+  mountain_gorilla: "Gorille de montagne",
+  black_rhino: "Rhinocéros noir",
+  vaquita: "Vaquita",
+};
 
 /** World aggregate in World Bank API (ISO3 WLD). */
 const WB_WORLD = "WLD";
@@ -51,6 +61,55 @@ async function faostatOrFallback(
   }
 }
 
+/**
+ * Chiffres indicatifs (sauvage), non issus des APIs Banque mondiale / FAOSTAT.
+ * Mis à jour manuellement ou via Firestore ; « Actualiser » réécrit ces lignes avec les mêmes valeurs de base.
+ */
+function endangeredSpeciesStaticRows(): SpeciesStatRow[] {
+  return [
+    {
+      id: "tiger",
+      label: "Tigre (Panthera tigris) — individus sauvages estimés",
+      value: 5_000,
+      year: 2022,
+      unit: "individus (estimation)",
+      sourceLabel: "Ordre de grandeur type Liste rouge IUCN / synthèses récentes",
+      sourceUrl: IUCN_HUB,
+      status: "ok",
+    },
+    {
+      id: "mountain_gorilla",
+      label: "Gorille de montagne (Gorilla beringei beringei)",
+      value: 1_100,
+      year: 2020,
+      unit: "individus (census régionaux)",
+      sourceLabel: "Estimations publiées (Virunga, Bwindi, Mgahinga…)",
+      sourceUrl: IUCN_HUB,
+      status: "ok",
+    },
+    {
+      id: "black_rhino",
+      label: "Rhinocéros noir (Diceros bicornis)",
+      value: 6_500,
+      year: 2021,
+      unit: "individus (estimation sauvage)",
+      sourceLabel: "Agrégats Afrique de l’Est / Sud (IUCN / rapports de conservation)",
+      sourceUrl: IUCN_HUB,
+      status: "ok",
+    },
+    {
+      id: "vaquita",
+      label: "Marsouin du Golfe de Californie (Phocoena sinus)",
+      value: 18,
+      year: 2023,
+      unit: "individus (effectif critique)",
+      sourceLabel: "Estimations CIRVA / communiqués récents (très incertain)",
+      sourceUrl: "https://www.iucnredlist.org/species/17028/50370293",
+      status: "ok",
+    },
+  ];
+}
+
 function errRow(partial: Pick<SpeciesStatRow, "id" | "label">, message: string): SpeciesStatRow {
   return {
     ...partial,
@@ -78,7 +137,7 @@ export async function fetchSpeciesStats(): Promise<SpeciesStatRow[]> {
       errRow({ id: "humans", label: "Humains (population mondiale)" }, msg),
       errRow({ id: "cattle", label: "Vaches et bovins" }, msg),
       errRow({ id: "chickens", label: "Poules / volailles" }, msg),
-      errRow({ id: "pigeons", label: "Pigeons" }, msg),
+      ...SPECIES_ENDANGERED_IDS.map((id) => errRow({ id, label: ENDANGERED_ERR_LABEL[id] }, msg)),
     ];
   }
 
@@ -121,14 +180,6 @@ export async function fetchSpeciesStats(): Promise<SpeciesStatRow[]> {
     }),
   );
 
-  const pigeonsPromise = faostatOrFallback("pigeons", 1079, fallback).then(
-    (d): SpeciesStatRow => ({
-      id: "pigeons",
-      label: "Pigeons (code FAOSTAT agrégé — vérifier l’intitulé exact dans la base)",
-      ...d,
-      status: "ok",
-    }),
-  );
-
-  return Promise.all([humansPromise, cattlePromise, chickensPromise, pigeonsPromise]);
+  const base = await Promise.all([humansPromise, cattlePromise, chickensPromise]);
+  return [...base, ...endangeredSpeciesStaticRows()];
 }

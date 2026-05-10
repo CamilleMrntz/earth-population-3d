@@ -3,7 +3,7 @@ import type { SpeciesId } from "./speciesIds";
 /**
  * Visual instance budget: proportional to real population scale, but never equal to real counts.
  * Uses one **global** scale so a more numerous species always gets visibly more dots than a rarer one
- * (same solo budget: humans ≫ cattle ≫ pigeons when populations differ).
+ * (same solo budget: humans ≫ cattle when populations differ).
  */
 
 const BUDGET_ONE = 10_000;
@@ -17,7 +17,11 @@ export const REF_POP: Record<SpeciesId, number> = {
   humans: 8_000_000_000,
   cattle: 950_000_000,
   chickens: 33_000_000_000,
-  pigeons: 500_000_000,
+  /** Ancres visuelles (ordre de grandeur IUCN / rapports récents, pas des effectifs exacts). */
+  tiger: 5_000,
+  mountain_gorilla: 1_100,
+  black_rhino: 6_500,
+  vaquita: 18,
 };
 
 /** Largest reference population — denominates everyone so shares stay comparable across species. */

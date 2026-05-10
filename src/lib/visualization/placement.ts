@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
 import type { SpeciesId } from "./speciesIds";
+import { isEndangeredSpeciesId } from "./speciesIds";
 
 function lonLatFromDirection(dir: THREE.Vector3, out: { lon: number; lat: number }): void {
   out.lat = Math.asin(Math.max(-1, Math.min(1, dir.y)));
@@ -26,18 +27,9 @@ function cattleChickenWeight(lonDeg: number, latDeg: number): number {
   return s;
 }
 
-/** Slight bias toward northern mid-latitudes (very rough “synanthropic” proxy). */
-function pigeonWeight(lonDeg: number, latDeg: number): number {
-  const d = (latDeg - 35) / 22;
-  const belt = Math.exp(-d * d) * 0.55 + 0.2;
-  const coast = cattleChickenWeight(lonDeg, latDeg) * 0.35;
-  return belt + coast;
-}
-
 function weightForSpecies(id: SpeciesId, lonDeg: number, latDeg: number): number {
-  if (id === "humans") return 1;
+  if (id === "humans" || isEndangeredSpeciesId(id)) return 1;
   if (id === "cattle" || id === "chickens") return cattleChickenWeight(lonDeg, latDeg);
-  if (id === "pigeons") return pigeonWeight(lonDeg, latDeg);
   return 1;
 }
 

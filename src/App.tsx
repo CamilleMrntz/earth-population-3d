@@ -6,7 +6,7 @@ import type { SpeciesPointLayerInput } from "./lib/earth/speciesPointManager";
 import { loadSpeciesStatsCached } from "./lib/population/loadSpeciesStatsCached";
 import type { SpeciesStatRow } from "./lib/population/types";
 import { computeVizInstanceCounts, populationForScale } from "./lib/visualization/instanceBudget";
-import { SPECIES_CHECKBOX_LABEL, SPECIES_VIZ_COLORS } from "./lib/visualization/speciesUiMeta";
+import { SPECIES_VIZ_COLORS } from "./lib/visualization/speciesUiMeta";
 import { isSpeciesId, SPECIES_IDS, type SpeciesId } from "./lib/visualization/speciesIds";
 
 /**
@@ -66,15 +66,16 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <EarthViewer speciesLayers={speciesLayers} />
       <SpeciesStatsPanel
         rows={rows}
         loading={statsLoading}
         onRefresh={() => reloadStats(true)}
         selected={selected}
         onToggleSpecies={toggleSpecies}
-        speciesCheckboxLabels={SPECIES_CHECKBOX_LABEL}
       />
+      <div className="app-shell__globe">
+        <EarthViewer speciesLayers={speciesLayers} />
+      </div>
     </div>
   );
 }

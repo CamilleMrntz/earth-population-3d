@@ -10,11 +10,6 @@
       "value": 33900000000,
       "year": 2022,
       "sourceUrl": "https://www.fao.org/faostat/en/#data/QCL"
-    },
-    "pigeons": {
-      "value": 428000000,
-      "year": 2022,
-      "sourceUrl": "https://www.fao.org/faostat/en/#data/QCL"
     }
   }
 }

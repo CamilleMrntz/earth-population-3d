@@ -6,7 +6,7 @@ import type { SpeciesId } from "../visualization/speciesIds";
 export const SPECIES_COLLECTION = "species";
 
 /**
- * One document per species: `species/{speciesId}` with `speciesId` in `humans` | `cattle` | …
+ * One document per species: `species/{speciesId}` avec `speciesId` parmi les ids connus de l’app.
  * Extra optional fields are safe to add later without breaking older clients.
  */
 export type SpeciesFirestoreDoc = {

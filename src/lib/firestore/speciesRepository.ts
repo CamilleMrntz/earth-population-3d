@@ -57,7 +57,7 @@ function docToRow(id: string, data: DocumentData): SpeciesStatRow {
   };
 }
 
-/** Returns ordered rows if all four species exist in Firestore; otherwise `null`. */
+/** Retourne les lignes ordonnées si tous les `SPECIES_IDS` ont un document ; sinon `null`. */
 export async function readCachedSpeciesRows(): Promise<SpeciesStatRow[] | null> {
   const db = getFirestoreDb();
   const snap = await getDocs(collection(db, SPECIES_COLLECTION));
