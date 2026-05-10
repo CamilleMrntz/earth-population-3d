@@ -1,21 +1,36 @@
 import { useEffect, useRef } from "react";
 
-import { createGlobeScene } from "../../lib/earth/createGlobeScene";
+import { createGlobeScene, type GlobeSceneHandle } from "../../lib/earth/createGlobeScene";
+import type { SpeciesPointLayerInput } from "../../lib/earth/speciesPointManager";
+
+type EarthViewerProps = {
+  /** Instanced dot layers (counts are already visualization budgets). */
+  speciesLayers: SpeciesPointLayerInput[];
+};
 
 /**
  * React wrapper around imperative Three.js setup.
  * The canvas fills its parent; App / layout controls final size (here: full viewport via CSS).
  */
-export function EarthViewer() {
+export function EarthViewer({ speciesLayers }: EarthViewerProps) {
   const hostRef = useRef<HTMLDivElement>(null);
+  const apiRef = useRef<GlobeSceneHandle | null>(null);
 
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
 
-    const { dispose } = createGlobeScene(host);
-    return dispose;
+    const api = createGlobeScene(host);
+    apiRef.current = api;
+    return () => {
+      api.dispose();
+      apiRef.current = null;
+    };
   }, []);
+
+  useEffect(() => {
+    apiRef.current?.setSpeciesLayers(speciesLayers);
+  }, [speciesLayers]);
 
   return (
     <div

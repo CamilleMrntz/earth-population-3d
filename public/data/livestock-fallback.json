@@ -1,0 +1,20 @@
+{
+  "note": "Valeurs de secours (ordre de grandeur) lorsque l’API FAOSTAT est indisponible. À remplacer par des agrégats téléchargés depuis FAOSTAT ou votre propre backend.",
+  "species": {
+    "cattle": {
+      "value": 942565000,
+      "year": 2022,
+      "sourceUrl": "https://www.fao.org/faostat/en/#data/QCL"
+    },
+    "chickens": {
+      "value": 33900000000,
+      "year": 2022,
+      "sourceUrl": "https://www.fao.org/faostat/en/#data/QCL"
+    },
+    "pigeons": {
+      "value": 428000000,
+      "year": 2022,
+      "sourceUrl": "https://www.fao.org/faostat/en/#data/QCL"
+    }
+  }
+}

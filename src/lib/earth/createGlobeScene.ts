@@ -2,11 +2,14 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 import { EARTH_DAY_MAP_PATH, EARTH_NORMAL_MAP_PATH, EARTH_SPHERE_SEGMENTS } from "./constants";
+import { createSpeciesPointManager, type SpeciesPointLayerInput } from "./speciesPointManager";
 import { getSunDirectionUnit } from "./subsolar";
+import { buildLandDirectionPool } from "../visualization/landSampler";
 
 export type GlobeSceneHandle = {
-  /** Stop the render loop and free GPU/CPU resources (call on React unmount). */
   dispose: () => void;
+  /** Updates instanced dots for at most two species (counts are visualization budgets, not real populations). */
+  setSpeciesLayers: (layers: SpeciesPointLayerInput[]) => void;
 };
 
 /**
@@ -61,7 +64,15 @@ export function createGlobeScene(container: HTMLElement): GlobeSceneHandle {
 
   const textureLoader = new THREE.TextureLoader();
 
-  const earthMap = textureLoader.load(EARTH_DAY_MAP_PATH);
+  const speciesPoints = createSpeciesPointManager(scene);
+
+  const earthMap = textureLoader.load(EARTH_DAY_MAP_PATH, (tex) => {
+    const img = tex.image as HTMLImageElement;
+    if (img?.naturalWidth) {
+      const pool = buildLandDirectionPool(img, 7500);
+      speciesPoints.setLandPool(pool);
+    }
+  });
   earthMap.colorSpace = THREE.SRGBColorSpace;
   earthMap.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
@@ -114,6 +125,7 @@ export function createGlobeScene(container: HTMLElement): GlobeSceneHandle {
     cancelAnimationFrame(rafId);
     window.removeEventListener("resize", onResize);
 
+    speciesPoints.dispose();
     controls.dispose();
     geometry.dispose();
     material.dispose();
@@ -126,5 +138,10 @@ export function createGlobeScene(container: HTMLElement): GlobeSceneHandle {
     }
   };
 
-  return { dispose };
+  return {
+    dispose,
+    setSpeciesLayers(layers: SpeciesPointLayerInput[]) {
+      speciesPoints.setLayers(layers);
+    },
+  };
 }

@@ -14,3 +14,9 @@ body,
   overflow: hidden;
   background: #020617;
 }
+
+.app-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
